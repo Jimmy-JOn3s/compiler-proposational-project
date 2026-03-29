@@ -1,4 +1,5 @@
 {
+    "python.defaultInterpreterPath": "/Users/waiyanaung/Documents/Jan 2026/PLC/compiler-starter-project/.venv/bin/python",
     "python.testing.pytestArgs": [
         "src"
     ],

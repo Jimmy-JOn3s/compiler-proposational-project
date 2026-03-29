@@ -8,9 +8,15 @@
             "name": "[example] Python Debugger",
             "type": "debugpy",
             "request": "launch",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "program": "main.py",
-            "cwd": "${workspaceFolder}/src/example/"
+            "python": "/Users/waiyanaung/Documents/Jan 2026/PLC/compiler-starter-project/.venv/bin/python",
+            "module": "example.main",
+            "cwd": "${workspaceFolder}/src",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src",
+                "QT_PLUGIN_PATH": "/Users/waiyanaung/Documents/Jan 2026/PLC/compiler-starter-project/.venv/lib/python3.10/site-packages/PySide6/Qt/plugins",
+                "QT_QPA_PLATFORM_PLUGIN_PATH": "/Users/waiyanaung/Documents/Jan 2026/PLC/compiler-starter-project/.venv/lib/python3.10/site-packages/PySide6/Qt/plugins/platforms",
+                "DYLD_FRAMEWORK_PATH": "/Users/waiyanaung/Documents/Jan 2026/PLC/compiler-starter-project/.venv/lib/python3.10/site-packages/PySide6/Qt/lib"
+            }
         },
         {
             "name": "[project] Python Debugger",

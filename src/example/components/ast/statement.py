@@ -1,85 +1,75 @@
-from enum import Enum
-from abc import ABC, abstractmethod
+from __future__ import annotations
 
-class Statement:
-    """What is statement?
-    In this calculator project, a statement is each line of math expression.
-    In this case, it will consit of tree of math expression
-    """
-    def __init__(self) -> None:
-        root_node
-        
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from enum import Enum
+
 
 class Operations(Enum):
-    PLUS:int=0
-    MINUS:int=1
-    TIMES:int=2
-    DIVIDE:int=3
+    AND = "AND"
+    OR = "OR"
+    NOT = "NOT"
 
-class Expression(ABC): 
+
+@dataclass
+class EvaluationResult:
+    truth_value: bool
+    prefix: str
+
+    def display_value(self) -> str:
+        return "T" if self.truth_value else "F"
+
+
+class Expression(ABC):
     @abstractmethod
-    def __init__(self) -> None:
-        self.signature:str = ""
-        self.value:int = None
-        pass
+    def evaluate(self) -> EvaluationResult:
+        raise NotImplementedError
 
-    @abstractmethod
-    def run(self) -> None:
-        pass
 
-class Expression_math(Expression):
-    def __init__(self, operation:Operations, parameter1:Expression, parameter2:Expression):
-        # Init attribute
-        self.operation:Operations = operation
-        self.parameter1:Expression = parameter1
-        self.parameter2:Expression = parameter2
-        self.signature:str = ""
-        self.value:int = None
-        # Checking Logic
-        assert operation in Operations
+@dataclass
+class ExpressionLiteral(Expression):
+    value: bool
 
-        # Create a children
-        self.children = [self.parameter1, self.parameter2]
-        
-    def run(self) -> None:
-        # evaluate child first
-        for child in self.children:
-            child.run()
-            # print(child)
+    def evaluate(self) -> EvaluationResult:
+        prefix = "T" if self.value else "F"
+        return EvaluationResult(truth_value=self.value, prefix=prefix)
 
-        # print(f"Calculating: {self.operation.name=} {self.parameter1=} {self.parameter2=}")
-        if(self.operation == Operations.PLUS):
-            self.value = self.parameter1.value + self.parameter2.value
-        elif(self.operation == Operations.MINUS):
-            self.value = self.parameter1.value - self.parameter2.value
-        elif(self.operation == Operations.TIMES):
-            self.value = self.parameter1.value * self.parameter2.value
-        elif(self.operation == Operations.DIVIDE):
-            self.value = self.parameter1.value / self.parameter2.value
+
+@dataclass
+class ExpressionUnary(Expression):
+    operation: Operations
+    operand: Expression
+
+    def evaluate(self) -> EvaluationResult:
+        operand_result = self.operand.evaluate()
+
+        if self.operation != Operations.NOT:
+            raise ValueError(f"Unsupported unary operation: {self.operation}")
+
+        return EvaluationResult(
+            truth_value=not operand_result.truth_value,
+            prefix=f"NOT {operand_result.prefix}",
+        )
+
+
+@dataclass
+class ExpressionBinary(Expression):
+    operation: Operations
+    left: Expression
+    right: Expression
+
+    def evaluate(self) -> EvaluationResult:
+        left_result = self.left.evaluate()
+        right_result = self.right.evaluate()
+
+        if self.operation == Operations.AND:
+            truth_value = left_result.truth_value and right_result.truth_value
+        elif self.operation == Operations.OR:
+            truth_value = left_result.truth_value or right_result.truth_value
         else:
-            raise ValueError(f"{self.operation=} is not support. Please use class Statement.Operations. Actually, this should not happen.")
-        
-        self.signature = f"Expression: {self.operation.name} {self.parameter1.value} {self.parameter2.value}"
-        print(self)
+            raise ValueError(f"Unsupported binary operation: {self.operation}")
 
-    def __repr__(self) -> str:
-        return self.signature
-
-class Expression_number(Expression):
-    def __init__(self, number:int) -> None:
-        self.value:int = number
-        self.signature:str= str(number)
-        
-    def run(self) -> None:
-        print(self)
-
-    def __repr__(self) -> str:
-        return f"Expression_number:{self.signature}"
-
-if __name__ == "__main__":
-    number1 = Expression_number(number=8)
-    number2 = Expression_number(number=9)
-    expr = Expression_math(Operations.MINUS, parameter1=number1, parameter2=number2)
-    expr.run()
-    # print(expr.hshow())
-    print(expr.value)
+        return EvaluationResult(
+            truth_value=truth_value,
+            prefix=f"{self.operation.value} {left_result.prefix} {right_result.prefix}",
+        )
